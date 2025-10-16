@@ -1,0 +1,150 @@
+/**
+ * =====================================================================
+ * |                      MINI AGENDA EM C                           |
+ * |-------------------------------------------------------------------|
+ * | Este programa é um exemplo de um CRUD (Create, Read) simples      |
+ * | que salva registros de contatos em um arquivo binário.            |
+ * | Demonstra o uso de structs, funções, manipulação de arquivos e    |
+ * | entrada/saída de dados no console.                                |
+ * =====================================================================
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Define o nome do arquivo que será nosso "banco de dados"
+#define NOME_ARQUIVO "agenda.bin"
+
+// Estrutura para representar um Contato
+typedef struct {
+    int id;
+    char nome[50];
+    int idade;
+} Contato;
+
+// --- Protótipos das Funções ---
+void exibirMenu();
+void adicionarContato();
+void listarContatos();
+void limparTela();
+
+// --- Função Principal ---
+int main() {
+    int opcao;
+
+    // Loop principal do programa
+    while (1) {
+        exibirMenu();
+        printf("Escolha uma opção: ");
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+            case 1:
+                adicionarContato();
+                break;
+            case 2:
+                listarContatos();
+                break;
+            case 0:
+                printf("Saindo do programa. Até logo!\n");
+                return 0; // Encerra o programa com sucesso
+            default:
+                printf("Opção inválida! Tente novamente.\n");
+                break;
+        }
+        printf("\nPressione Enter para continuar...");
+        // Limpa o buffer de entrada antes de esperar o Enter
+        while(getchar() != '\n');
+        getchar(); // Espera o usuário pressionar Enter
+    }
+
+    return 0;
+}
+
+// Função para limpar a tela do console (compatível com Windows e Linux/Mac)
+void limparTela() {
+#ifdef _WIN32
+    system("cls");
+#else
+    system("clear");
+#endif
+}
+
+// Função que exibe o menu de opções para o usuário
+void exibirMenu() {
+    limparTela();
+    printf("========================\n");
+    printf("=      MINHA AGENDA    =\n");
+    printf("========================\n");
+    printf("1. Adicionar Contato\n");
+    printf("2. Listar Contatos\n");
+    printf("0. Sair\n");
+    printf("------------------------\n");
+}
+
+// Função para adicionar um novo contato ao arquivo
+void adicionarContato() {
+    Contato novo_contato;
+    FILE *arquivo; // Ponteiro para o arquivo
+
+    // Abre o arquivo em modo "append binary" (adicionar no final, em binário)
+    // Se o arquivo não existir, ele será criado.
+    arquivo = fopen(NOME_ARQUIVO, "ab");
+
+    if (arquivo == NULL) {
+        printf("Erro ao abrir o arquivo!\n");
+        return;
+    }
+
+    limparTela();
+    printf("--- Adicionar Novo Contato ---\n");
+    printf("Digite o ID: ");
+    scanf("%d", &novo_contato.id);
+
+    printf("Digite o Nome: ");
+    // Limpa o buffer antes de ler a string para evitar problemas
+    while(getchar() != '\n'); 
+    fgets(novo_contato.nome, 50, stdin);
+    novo_contato.nome[strcspn(novo_contato.nome, "\n")] = 0; // Remove o \n do final
+
+    printf("Digite a Idade: ");
+    scanf("%d", &novo_contato.idade);
+
+    // Escreve a struct inteira no arquivo binário
+    fwrite(&novo_contato, sizeof(Contato), 1, arquivo);
+
+    // Fecha o arquivo para salvar as alterações
+    fclose(arquivo);
+
+    printf("\nContato adicionado com sucesso!\n");
+}
+
+// Função para ler e exibir todos os contatos do arquivo
+void listarContatos() {
+    Contato contato_lido;
+    FILE *arquivo;
+
+    // Abre o arquivo em modo "read binary" (leitura em binário)
+    arquivo = fopen(NOME_ARQUIVO, "rb");
+
+    if (arquivo == NULL) {
+        printf("Nenhum contato cadastrado ainda ou erro ao abrir o arquivo.\n");
+        return;
+    }
+
+    limparTela();
+    printf("--- Lista de Contatos ---\n");
+    printf("--------------------------------------------------\n");
+    printf("%-5s | %-30s | %s\n", "ID", "Nome", "Idade");
+    printf("--------------------------------------------------\n");
+
+    // Lê o arquivo registro por registro até o final
+    while (fread(&contato_lido, sizeof(Contato), 1, arquivo) == 1) {
+        printf("%-5d | %-30s | %d\n", contato_lido.id, contato_lido.nome, contato_lido.idade);
+    }
+    printf("--------------------------------------------------\n");
+
+    // Fecha o arquivo após a leitura
+    fclose(arquivo);
+}
