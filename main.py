@@ -1,5 +1,4 @@
 import re
-import sys
 
 lista_definicoes = [
     ('palavras_chave',      r'\bint|float|double|char|void|short|long|if|else|while|for|switch|break|continue|typedef|return|struct|const|extern|static|sizeof|unsigned|signed|case|auto|default|do|enum|goto|register|volatile|union\b'),
@@ -23,7 +22,7 @@ for nome, padrao in lista_definicoes:
     partes_regex.append(f'(?P<{nome}>{padrao})')
 regex_principal = '|'.join(partes_regex)
 
-token_regex = re.compile(regex_principal, re.MULTILINE)
+token_regex = re.compile(regex_principal, re.MULTILINE) #estudar isso
 
 
 class Token:
@@ -78,7 +77,7 @@ def analisar(codigo_fonte):
         if tipo in ['quebra_linha', 'pular_espacamentos', 'comentario']:
             continue
         elif tipo == 'erro':
-            print(f"Erro Léxico: Caractere inesperado '{valor}'", file=sys.stderr)
+            print(f"Erro Léxico: Caractere inesperado '{valor}'")
             continue
 
         if tipo == 'identificadores':
@@ -113,6 +112,6 @@ if __name__ == "__main__":
                 print(f"{id_simbolo:^2} | {simbolo}")
 
     except FileNotFoundError:
-        print(f"Erro: O arquivo '{nome_arquivo}' não foi encontrado.", file=sys.stderr)
+        print(f"Erro: O arquivo '{nome_arquivo}' não foi encontrado.")
     except Exception as e:
-        print(f"Ocorreu um erro inesperado: {e}", file=sys.stderr)
+        print(f"Ocorreu um erro inesperado: {e}")
